@@ -71,6 +71,7 @@ public class PlaneBehaviour : MonoBehaviour
 		{
 			GameManager.Instance.HandlePlayerDeath();
 		}
+		
 	}
 
 	IEnumerator canvasStuff()
