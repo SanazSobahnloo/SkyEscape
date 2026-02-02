@@ -2,44 +2,83 @@ using UnityEngine;
 
 public class AudioManager : MonoBehaviour
 {
-    public static AudioManager Instance { get; private set; }
+    public static AudioManager Instance;
 
-    [Header("Audio Sources")]
-    public AudioSource musicSource;   // background music
-    public AudioSource sfxSource;     // for button clicks / explosions (optional)
+    [Header("BGM")]
+    public AudioClip menuMusic;
 
-    const string MUTE_KEY = "Muted_v1";
+    private AudioSource bgmSource;
+    private bool isMuted;
 
-    void Awake()
+    private const string MutedKey = "MUTED";
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    static void Bootstrap()
     {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        if (Instance != null) return;
+
+        var go = new GameObject("AudioManager");
+        go.AddComponent<AudioManager>();
+    }
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
         Instance = this;
         DontDestroyOnLoad(gameObject);
+
+        bgmSource = GetComponent<AudioSource>();
+        if (bgmSource == null) bgmSource = gameObject.AddComponent<AudioSource>();
+        bgmSource.loop = true;
+        bgmSource.playOnAwake = false;
+
+        isMuted = PlayerPrefs.GetInt(MutedKey, 0) == 1;
+        ApplyMute();
+
+        Debug.Log("[AudioManager] Awake. Muted=" + isMuted);
     }
 
-    void Start()
-    {
-        bool muted = PlayerPrefs.GetInt(MUTE_KEY, 0) == 1;
-        SetMuted(muted);
-    }
+    public bool IsMuted() => isMuted;
 
     public void ToggleMute()
     {
-        bool muted = !IsMuted();
-        SetMuted(muted);
+        isMuted = !isMuted;
+        PlayerPrefs.SetInt(MutedKey, isMuted ? 1 : 0);
+        ApplyMute();
+
+        Debug.Log("[AudioManager] ToggleMute -> " + isMuted);
     }
 
-    public void SetMuted(bool muted)
+    public void PlayMenuMusic()
     {
-        PlayerPrefs.SetInt(MUTE_KEY, muted ? 1 : 0);
-        PlayerPrefs.Save();
+        if (menuMusic == null)
+        {
+            Debug.LogWarning("[AudioManager] menuMusic is NULL");
+            return;
+        }
 
-        if (musicSource != null) musicSource.mute = muted;
-        if (sfxSource != null) sfxSource.mute = muted;
+        if (bgmSource.clip != menuMusic)
+            bgmSource.clip = menuMusic;
+
+        if (!isMuted && !bgmSource.isPlaying)
+            bgmSource.Play();
+
+        Debug.Log("[AudioManager] PlayMenuMusic. playing=" + bgmSource.isPlaying);
     }
 
-    public bool IsMuted()
+    private void ApplyMute()
     {
-        return PlayerPrefs.GetInt(MUTE_KEY, 0) == 1;
+        AudioListener.volume = isMuted ? 0f : 1f;
+
+        if (bgmSource != null)
+        {
+            if (isMuted) bgmSource.Pause();
+            else bgmSource.UnPause();
+        }
     }
 }
