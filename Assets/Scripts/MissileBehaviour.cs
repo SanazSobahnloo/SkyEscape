@@ -10,6 +10,8 @@ public class MissileBehaviour : MonoBehaviour {
 	public GameObject explosionEffect; 
 	public float speed = 6f, rotationSpeed = 120f, dustWait = .05f;
 
+	public AudioClip hitPlaneClip;
+
 	// Use this for initialization
 	void Start () {
 		rb = GetComponent<Rigidbody2D>();
@@ -17,7 +19,7 @@ public class MissileBehaviour : MonoBehaviour {
 	}
 	
 	void FixedUpdate(){
-		rb.velocity = transform.up * speed;
+		rb.linearVelocity = transform.up * speed;
 		if(target != null){
 			Vector2 direction = (Vector2) target.position - rb.position;
 			direction.Normalize();
@@ -34,15 +36,39 @@ public class MissileBehaviour : MonoBehaviour {
 		}
 	}
 
-	void OnTriggerEnter2D(Collider2D other){
-		string tag = other.gameObject.tag;
-		if(tag.Equals("plane")){
-			blowUpPlane(other.gameObject.transform);
-		}
-		if(tag.Equals("missile")){
-			blowUpSelf();
-		}
-	}
+	void OnTriggerEnter2D(Collider2D other)
+{
+    // برخورد با هواپیما
+    if (other.CompareTag("plane"))
+    {
+        // پخش صدا
+        if (SFXPlayer.Instance != null)
+            SFXPlayer.Instance.PlayOneShot(hitPlaneClip, 1f);
+
+        // انفجار/افکت قبلی تو
+        blowUpPlane(other.transform);
+
+        // خیلی مهم: PlaneBehaviour ممکنه روی Parent باشه
+        PlaneBehaviour plane = other.GetComponentInParent<PlaneBehaviour>();
+        if (plane != null)
+        {
+            plane.gameOver(transform);   // این باید لوز پنل رو بالا بیاره
+        }
+        else
+        {
+            Debug.LogError("PlaneBehaviour پیدا نشد! PlaneBehaviour روی Parent هواپیماست؟");
+        }
+
+        return;
+    }
+
+    // برخورد با موشک
+    if (other.CompareTag("missile"))
+    {
+        blowUpSelf();
+    }
+}
+
 
 	void blowUpPlane(Transform plane){
 		blowUpSelf();
