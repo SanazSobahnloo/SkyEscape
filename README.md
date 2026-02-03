@@ -1,6 +1,6 @@
-# ✈️ SkyEscape — A Missile Dodging Game (Unity)
+# ✈️ Chasing Planes — A Missile Dodging Game (Unity)
 
-**SkyEscape** is a fast-paced 3D survival game built with **Unity 2022.3.50f1**, inspired by *ChasingPlanes*.  
+**Chasing Planes** is a fast-paced 3D survival game built with **Unity 2022.3.50f1**,.  
 You play as a small pilot navigating an open sky while **dodging homing missiles** launched from all sides of the map.  
 The longer you survive, the higher your **score** climbs — test your reflexes and aim for the ultimate **high score!**
 
@@ -52,7 +52,9 @@ UserSettings/
 ---
 
 ## 📸 Screenshots
-*(Add gameplay screenshots)*
+
+![chasing planes GIF](https://github.com/user-attachments/assets/5c9aff81-5f7f-4eb6-9e22-72fcde5a55f0)
+
 
 ---
 
